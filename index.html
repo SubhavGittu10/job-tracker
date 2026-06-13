@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Job Tracker — Subhav Malhotra</title>
+<link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+
+<!-- Loading bar -->
+<div id="loading-bar" style="position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#4f46e5,#7c3aed);z-index:999;display:none;animation:shimmer 1.2s infinite"></div>
+<style>@keyframes shimmer{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}</style>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div id="hdr-brand">💼 Job Tracker</div>
+  <div id="nav">
+    <button class="ntab on"  id="nav-jobs"     onclick="goPage('jobs')">📋 Jobs</button>
+    <button class="ntab"     id="nav-pipeline" onclick="goPage('pipeline')">🔄 Pipeline</button>
+    <button class="ntab"     id="nav-nurture"  onclick="goPage('nurture')">🤖 Nurture</button>
+    <button class="ntab"     id="nav-settings" onclick="goPage('settings')">⚙️ Settings</button>
+  </div>
+  <div id="hdr-right">
+    <span id="ts" style="font-size:11px;color:#94a3b8">Loading…</span>
+    <button id="sync-btn" onclick="boot()">↻ Refresh</button>
+  </div>
+</div>
+
+<!-- JOBS PAGE -->
+<div class="pg on" id="pg-jobs">
+  <div id="stats">
+    <div class="stab on" id="stab-all"      onclick="setFilter('all')">      <span class="n" id="cn-all">—</span><span class="l">All</span></div>
+    <div class="stab"    id="stab-New Lead" onclick="setFilter('New Lead')"> <span class="n" id="cn-nl"  style="color:#4f46e5">—</span><span class="l">🔵 Leads</span></div>
+    <div class="stab"    id="stab-sel"      onclick="setFilter('selected')"> <span class="n" id="cn-sel" style="color:#d97706">—</span><span class="l">⭐ Starred</span></div>
+    <div class="stab"    id="stab-Applied"  onclick="setFilter('Applied')">  <span class="n" id="cn-app" style="color:#2563eb">—</span><span class="l">📋 Applied</span></div>
+    <div class="stab"    id="stab-Interview" onclick="setFilter('Interview')"><span class="n" id="cn-int" style="color:#d97706">—</span><span class="l">📞 Interview</span></div>
+    <div class="stab"    id="stab-Offer"    onclick="setFilter('Offer')">    <span class="n" id="cn-off" style="color:#059669">—</span><span class="l">🎉 Offer</span></div>
+    <div class="stab"    id="stab-Rejected" onclick="setFilter('Rejected')"> <span class="n" id="cn-rej" style="color:#dc2626">—</span><span class="l">❌ Rejected</span></div>
+  </div>
+  <div id="filters">
+    <input type="search" id="f-search" placeholder="🔍 Search company or role…" oninput="renderJobs()"/>
+    <select id="f-src" onchange="renderJobs()">
+      <option value="">All Sources</option>
+      <option>IIMJobs</option><option>Hirist</option><option>Naukri</option>
+      <option>LinkedIn</option><option>Indeed</option><option>Direct</option>
+    </select>
+    <select id="f-loc" onchange="renderJobs()">
+      <option value="">All Locations</option>
+      <option>Bengaluru</option><option>Mumbai</option><option>Hyderabad</option>
+      <option>Gurgaon</option><option>Remote</option>
+    </select>
+    <select id="f-sort" onchange="renderJobs()">
+      <option value="score">↕ Score</option>
+      <option value="date">↕ Date</option>
+      <option value="az">↕ A–Z</option>
+    </select>
+  </div>
+  <div id="grid"></div>
+</div>
+
+<!-- PIPELINE PAGE -->
+<div class="pg" id="pg-pipeline"><div id="pipeline"></div></div>
+
+<!-- NURTURE AGENT PAGE -->
+<div class="pg" id="pg-nurture">
+  <div class="top-picks">
+    <div class="top-picks-left">
+      <h3>🤖 Nurture Agent</h3>
+      <p>Auto-draft applications for top leads · Generate referral outreach for applied roles</p>
+    </div>
+    <div class="top-picks-stats">
+      <div class="tp-stat"><span class="n" id="np-leads">—</span><div class="l">Actionable<br>Leads</div></div>
+      <div class="tp-stat"><span class="n" id="np-applied">—</span><div class="l">Applied<br>Roles</div></div>
+      <div class="tp-stat"><span class="n" id="np-interviews">—</span><div class="l">Active<br>Interviews</div></div>
+    </div>
+  </div>
+  <div class="funnel-grid">
+    <div class="funnel-col">
+      <div class="funnel-col-hdr">
+        <div class="funnel-icon blue">🎯</div>
+        <div><div class="funnel-col-title">Lead → Applied</div><div class="funnel-col-sub">Top leads · click to auto-draft your application</div></div>
+      </div>
+      <div class="funnel-col-body" id="funnel-leads"></div>
+    </div>
+    <div class="funnel-col">
+      <div class="funnel-col-hdr">
+        <div class="funnel-icon green">🤝</div>
+        <div><div class="funnel-col-title">Applied → Referral</div><div class="funnel-col-sub">Boost response rate · personalised reachout</div></div>
+      </div>
+      <div class="funnel-col-body" id="funnel-applied"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="pg" id="pg-settings">
+  <div id="settings-wrap">
+    <div class="s-sec">
+      <div class="s-sec-title">🧠 Preference Memory <span style="font-size:11px;color:#94a3b8;font-weight:400">— live from Airtable · click ✏️ to edit any value</span></div>
+      <div class="pref-grid" id="pref-grid">
+        <div style="color:#94a3b8;font-size:13px;padding:12px">Loading from Airtable…</div>
+      </div>
+    </div>
+    <div class="s-sec">
+      <div class="s-sec-title">💬 Q&amp;A Knowledge Base <span style="font-size:11px;color:#94a3b8;font-weight:400">— live from Airtable · click ✏️ to edit</span></div>
+      <div id="qa-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="overlay" onclick="if(event.target===this)closeModal()">
+  <div id="modal-box">
+    <button id="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
